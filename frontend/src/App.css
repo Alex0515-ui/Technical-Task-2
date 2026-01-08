@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+:root {
+  --color-main-bg: white;
+  --color-main-text: #1a1a1a;
+  
+  --color-blue-500: #0077ff;
+}
+
+body {
+  background-color: var(--color-main-bg);
+  color: var(--color-main-text);
+  transition: background-color 0.3s, color 0.3s;
+}
