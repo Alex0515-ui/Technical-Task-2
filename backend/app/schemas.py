@@ -30,6 +30,9 @@ class Create_Product(BaseModel):
     image:str
     price:int
     category: Category
+    size: str = None
+    heat: str = None
+    cool: str = None
 
 
 

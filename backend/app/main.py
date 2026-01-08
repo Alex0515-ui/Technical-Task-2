@@ -1,11 +1,44 @@
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import declarative_base, Session
 from schemas import Get_Products, Update_Product, Create_Product
-from database import engine, get_db
+from fastapi.middleware.cors import CORSMiddleware
+from database import engine, get_db, session
 from models import Product, Category
 
 
 app = FastAPI()
+
+origins = [
+    "http://localhost:5173",    
+    "http://127.0.0.1:5173",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+def seed_db():
+    db = session()
+    try:
+        if db.query(Product).count() == 0:
+            all_products_data = [
+                { "category": 'ДИСПЕНСЕРЫ', "name": "МОДЕЛЬ ДИСПЕНСЕРА BONA D22", "image": "https://oasiswater.kz/wp-content/uploads/2023/03/000000004-2.jpg", "size": "300х300х395 мм", "heat": "5л/ч (>90-95° C)", "cool": "0.7л/ч (<10-12° C)", "price": 29500 },
+                { "category": 'ДИСПЕНСЕРЫ', "name": "МОДЕЛЬ ДИСПЕНСЕРА BONA 18 TA", "image": "https://oasiswater.kz/wp-content/uploads/2023/03/000000004-2.jpg", "size": "340х330х530 мм", "heat": "5л/ч (>90-95° C)", "cool": "0.7л/ч (<10-12° C)", "price": 32000 },
+                { "category": 'ПИТЬЕВОЙ ФОНТАН', "name": "МОДЕЛЬ ДИСПЕНСЕРА ECOCOOL 55TK", "image": "https://oasiswater.kz/wp-content/uploads/2023/03/55TK-1.jpg", "size": "290x285x395 мм", "heat": "5л/ч (>90-95° C)", "cool": "комнатная температура", "price": 21000 },
+                { "category": 'ПУРИФАЙЕР', "name": "МОДЕЛЬ ДИСПЕНСЕРА ECOCOOL 55TK", "image": "https://oasiswater.kz/wp-content/uploads/2023/03/55TK-1.jpg", "size": "290x285x395 мм", "heat": "5л/ч (>90-95° C)", "cool": "комнатная температура", "price": 21000 }
+            ]
+            for item in all_products_data:
+                db.add(Product(**item))
+            db.commit()
+            print("База наполнена!")
+    finally:
+        db.close()
+
+seed_db()
 
 # Запрос на получение всех продуктов
 @app.get("/products", response_model=list[Get_Products])
@@ -57,5 +90,7 @@ def update_product(id: int, data: Update_Product, db: Session = Depends(get_db))
     
     db.commit()
     return product
+
+
 
 

@@ -8,9 +8,9 @@ Base = declarative_base()
 
 # Выбор из категорий
 class Category(str, Enum):
-    Purifier = "Пурифаер"
-    Fountain = "Питьевой фонтан"
-    Dispancer = "Диспансер"
+    Purifier = "ПУРИФАЙЕР"
+    Fountain = "ПИТЬЕВОЙ ФОНТАН"
+    Dispancer = "ДИСПЕНСЕРЫ"
 
 # Главная модель продукта в бд
 class Product(Base):
@@ -20,6 +20,10 @@ class Product(Base):
     price = Column(Integer)
     image = Column(String)
     category = Column(String)
+
+    size = Column(String)
+    heat = Column(String)
+    cool = Column(String)
 
 # Создание модели в бд если ее не сущетсвует
 Base.metadata.create_all(bind=engine)
