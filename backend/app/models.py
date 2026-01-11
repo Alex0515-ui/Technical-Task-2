@@ -1,5 +1,5 @@
 from sqlalchemy.orm import declarative_base
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, JSON
 from enum import Enum
 from database import engine
 
@@ -21,9 +21,7 @@ class Product(Base):
     image = Column(String)
     category = Column(String)
 
-    size = Column(String)
-    heat = Column(String)
-    cool = Column(String)
+    details = Column(JSON, default={})
 
 # Создание модели в бд если ее не сущетсвует
 Base.metadata.create_all(bind=engine)

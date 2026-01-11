@@ -26,11 +26,41 @@ def seed_db():
     try:
         if db.query(Product).count() == 0:
             all_products_data = [
-                { "category": 'ДИСПЕНСЕРЫ', "name": "МОДЕЛЬ ДИСПЕНСЕРА BONA D22", "image": "https://oasiswater.kz/wp-content/uploads/2023/03/000000004-2.jpg", "size": "300х300х395 мм", "heat": "5л/ч (>90-95° C)", "cool": "0.7л/ч (<10-12° C)", "price": 29500 },
-                { "category": 'ДИСПЕНСЕРЫ', "name": "МОДЕЛЬ ДИСПЕНСЕРА BONA 18 TA", "image": "https://oasiswater.kz/wp-content/uploads/2023/03/000000004-2.jpg", "size": "340х330х530 мм", "heat": "5л/ч (>90-95° C)", "cool": "0.7л/ч (<10-12° C)", "price": 32000 },
-                { "category": 'ПИТЬЕВОЙ ФОНТАН', "name": "МОДЕЛЬ ДИСПЕНСЕРА ECOCOOL 55TK", "image": "https://oasiswater.kz/wp-content/uploads/2023/03/55TK-1.jpg", "size": "290x285x395 мм", "heat": "5л/ч (>90-95° C)", "cool": "комнатная температура", "price": 21000 },
-                { "category": 'ПУРИФАЙЕР', "name": "МОДЕЛЬ ДИСПЕНСЕРА ECOCOOL 55TK", "image": "https://oasiswater.kz/wp-content/uploads/2023/03/55TK-1.jpg", "size": "290x285x395 мм", "heat": "5л/ч (>90-95° C)", "cool": "комнатная температура", "price": 21000 }
-            ]
+    {
+        "category": "ДИСПЕНСЕРЫ",
+        "name": "МОДЕЛЬ ДИСПЕНСЕРА BONA D22",
+        "image": "https://oasiswater.kz/wp-content/uploads/2023/03/000000004-2.jpg",
+        "price": 29500,
+        "details": {
+            "size": "300х300х395 мм",
+            "heat": "5л/ч (>90-95° C)",
+            "cool": "0.7л/ч (<10-12° C)"
+        }
+    },
+    {
+        "category": "ДИСПЕНСЕРЫ",
+        "name": "МОДЕЛЬ ДИСПЕНСЕРА BONA 18 TA",
+        "image": "https://oasiswater.kz/wp-content/uploads/2023/03/000000004-2.jpg",
+        "price": 32000,
+        "details": {
+            "size": "340х330х530 мм",
+            "heat": "5л/ч (>90-95° C)",
+            "cool": "0.7л/ч (<10-12° C)"
+        }
+    },
+    {
+        "category": "ПИТЬЕВОЙ ФОНТАН",
+        "name": "МОДЕЛЬ ECOCOOL 55TK",
+        "image": "https://oasiswater.kz/wp-content/uploads/2023/03/55TK-1.jpg",
+        "price": 21000,
+        "details": {
+            "size": "290х285х395 мм",
+            "heat": "5л/ч (>90-95° C)",
+            "cool": "комнатная температура"
+        }
+    }
+]
+
             for item in all_products_data:
                 db.add(Product(**item))
             db.commit()
@@ -52,6 +82,15 @@ def get_all_products(category: Category | None = None, db: Session = Depends(get
     result = response.all()
     return result
 
+# Запрос на получение одного товара по id
+@app.get("/products/{id}")
+def get_product(id:int, db:Session = Depends(get_db)):
+    response = db.query(Product).filter(Product.id == id).first()
+    if not response:
+        return {"message": "Product not found"}
+    
+    return response
+
 # Запрос на удаление одного продукта по id
 @app.delete("/products/delete/{id}")
 def delete_product(id: int, db: Session = Depends(get_db)):
@@ -65,7 +104,11 @@ def delete_product(id: int, db: Session = Depends(get_db)):
 # Запрос на создание продукта
 @app.post("/products/create")
 def create_product(product: Create_Product, db: Session = Depends(get_db)):
-    new_product = Product(name = product.name, price = product.price, image = product.image, category = product.category.value)
+    new_product = Product(name = product.name,
+                          price = product.price,
+                          image = product.image,
+                          category = product.category.value,
+                          details = product.details)
     db.add(new_product)
     db.commit()
     db.refresh(new_product)
@@ -87,6 +130,8 @@ def update_product(id: int, data: Update_Product, db: Session = Depends(get_db))
         product.price = data.price
     if data.category is not None:
         product.category = data.category.value
+    if data.details is not None:
+        product.details = data.details
     
     db.commit()
     return product

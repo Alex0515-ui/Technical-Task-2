@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Dict
 from models import Category
 
 
@@ -11,6 +11,7 @@ class Update_Product(BaseModel):
     image: Optional[str] = None
     price: Optional[int] = None
     category: Optional[Category] = None
+    details: Optional[Dict[str, str]] = {}
 
 # Поля для получения всех продуктов
 class Get_Products(BaseModel):
@@ -19,6 +20,7 @@ class Get_Products(BaseModel):
     price: int
     category: Category
     image: str
+    details: Optional[Dict[str, str]] = {}
     
     # Этот класс нам нужен чтобы читать данные из orm объекта напрямую
     class Config:
@@ -30,9 +32,7 @@ class Create_Product(BaseModel):
     image:str
     price:int
     category: Category
-    size: str = None
-    heat: str = None
-    cool: str = None
+    details: Optional[Dict[str, str]] = {}
 
 
 
