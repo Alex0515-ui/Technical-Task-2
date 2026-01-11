@@ -3,10 +3,39 @@ from database import SessionLocal
 from models import Product
 
 all_products_data = [
-    { "id": 1, "category": 'ДИСПЕНСЕРЫ', "name": "МОДЕЛЬ ДИСПЕНСЕРА BONA D22", "image": "https://via.placeholder.com/200x250", "size": "300х300х395 мм", "heat": "5л/ч (>90-95° C)", "cool": "0.7л/ч (<10-12° C)", "price": "29 500" },
-    { "id": 2, "category": 'ДИСПЕНСЕРЫ', "name": "МОДЕЛЬ ДИСПЕНСЕРА BONA 18 TA", "image": "https://via.placeholder.com/200x250", "size": "340х330х530 мм", "heat": "5л/ч (>90-95° C)", "cool": "0.7л/ч (<10-12° C)", "price": "32 000" },
-    { "id": 3, "category": 'ПИТЬЕВОЙ ФОНТАН', "name": "МОДЕЛЬ ДИСПЕНСЕРА ECOCOOL 55TK", "image": "https://via.placeholder.com/200x250", "size": "290x285x395 мм", "heat": "5л/ч (>90-95° C)", "cool": "комнатная температура", "price": "21 000" },
-    { "id": 6, "category": 'ПУРИФАЙЕР', "name": "МОДЕЛЬ ДИСПЕНСЕРА ECOCOOL 55TK", "image": "https://via.placeholder.com/200x250", "size": "290x285x395 мм", "heat": "5л/ч (>90-95° C)", "cool": "комнатная температура", "price": "21 000" }
+    {
+        "category": "ДИСПЕНСЕРЫ",
+        "name": "МОДЕЛЬ ДИСПЕНСЕРА BONA D22",
+        "image": "https://oasiswater.kz/wp-content/uploads/2023/03/000000004-2.jpg",
+        "price": 29500,
+        "details": {
+            "size": "300х300х395 мм",
+            "heat": "5л/ч (>90-95° C)",
+            "cool": "0.7л/ч (<10-12° C)"
+        }
+    },
+    {
+        "category": "ДИСПЕНСЕРЫ",
+        "name": "МОДЕЛЬ ДИСПЕНСЕРА BONA 18 TA",
+        "image": "https://oasiswater.kz/wp-content/uploads/2023/03/000000004-2.jpg",
+        "price": 32000,
+        "details": {
+            "size": "340х330х530 мм",
+            "heat": "5л/ч (>90-95° C)",
+            "cool": "0.7л/ч (<10-12° C)"
+        }
+    },
+    {
+        "category": "ПИТЬЕВОЙ ФОНТАН",
+        "name": "МОДЕЛЬ ECOCOOL 55TK",
+        "image": "https://oasiswater.kz/wp-content/uploads/2023/03/55TK-1.jpg",
+        "price": 21000,
+        "details": {
+            "size": "290х285х395 мм",
+            "heat": "5л/ч (>90-95° C)",
+            "cool": "комнатная температура"
+        }
+    }
 ]
 
 def seed_db():
@@ -20,9 +49,7 @@ def seed_db():
                     price=item["price"],
                     image=item["image"],
                     category=item["category"],
-                    size=item["size"],
-                    heat=item["heat"],
-                    cool=item["cool"]
+                    details=item["details"]
                 )
                 db.add(new_product)
             db.commit()
