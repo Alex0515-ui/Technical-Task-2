@@ -21,7 +21,18 @@ class Product(Base):
     image = Column(String)
     category = Column(String)
 
-    details = Column(JSON, default={})
+    # Для диспенсера поля
+    heat = Column(String, nullable=True)
+    cool = Column(String, nullable=True)
+
+    # Для Питьевого фонтана поля
+    water_type = Column(String, nullable=True)
+    flow_rate = Column(String, nullable=True)
+    
+    # Для пурифайера поля
+    filters = Column(String, nullable=True)
+    water_modes = Column(String, nullable=True)
+
 
 # Создание модели в бд если ее не сущетсвует
 Base.metadata.create_all(bind=engine)
