@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, with_polymorphic
 from typing import Optional, Literal
 
 import schemas
@@ -41,7 +41,8 @@ def get_all_products(
     ] = None,
     db: Session = Depends(get_db),
 ):
-    query = db.query(Product)
+    poly = with_polymorphic(Product, [Dispenser, Purifier, Fountain])
+    query = db.query(poly)
     if product_type:
         query = query.filter(Product.product_type == ProductCategory(product_type))
 
@@ -108,3 +109,16 @@ def update_product(
     db.commit()
 
     return {"message": "Updated"}
+
+
+
+@app.delete("/products/{id}")
+def delete_product(id: int, db: Session = Depends(get_db)):
+    product = db.query(Product).filter(Product.id == id).first()
+    if not product:
+        raise HTTPException(404, "Product not found")
+    
+    db.delete(product)
+    db.commit()
+
+    return {"message": f"Product {id} deleted successfully"}
