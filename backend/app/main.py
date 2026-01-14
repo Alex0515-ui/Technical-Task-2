@@ -43,9 +43,15 @@ def get_all_products(
 ):
     poly = with_polymorphic(Product, [Dispenser, Purifier, Fountain])
     query = db.query(poly)
-    if product_type:
-        query = query.filter(Product.product_type == ProductCategory(product_type))
 
+
+    if product_type:
+        try:
+            target_enum = ProductCategory(product_type)
+            query = query.filter(Product.product_type == ProductCategory(product_type))
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid category")
+        
     products = query.all()
 
     return [

@@ -21,7 +21,7 @@ class Product(Base):
     image = Column(String)
 
     product_type = Column(
-        SQLEnum(ProductCategory, name="product_category"),
+        SQLEnum(ProductCategory, native_enum=False), 
         nullable=False
     )
 
