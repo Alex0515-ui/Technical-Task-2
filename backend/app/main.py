@@ -1,11 +1,12 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
-from schemas import Get_Products, Update_Product, Create_Product
+from schemas import ProductBase, DispenserBase, PurifierBase, FountainBase
 from fastapi.middleware.cors import CORSMiddleware
 from database import get_db
-from models import Product, Category
-from category_validate import validation_by_category
+from models import Product, Dispenser, Purifier, Fountain
 from seed import seed_db
+from typing import Literal, Optional
+from transform import product_to_schema
 
 app = FastAPI()
 
@@ -25,25 +26,26 @@ app.add_middleware(
 
 seed_db()
 
+
 # Запрос на получение всех продуктов
-@app.get("/products", response_model=list[Get_Products])
-def get_all_products(category: Category | None = None, db: Session = Depends(get_db)):
+@app.get("/products", response_model=list[ProductBase])
+def get_all_products(product_type : Optional[Literal["ДИСПЕНСЕРЫ", "ПИТЬЕВОЙ ФОНТАН", "ПУРИФАЙЕР"]] = None, db: Session = Depends(get_db)):
     response = db.query(Product)
     # query параметр для фильтрации по категории
-    if category:
-        response = response.filter(Product.category == category.value)
-
+    if product_type:
+        response = response.filter(Product.product_type == product_type)
+    
     result = response.all()
-    return result
+    return [product_to_schema(p) for p in result]
 
 # Запрос на получение одного товара по id
-@app.get("/products/{id}")
+@app.get("/products/{id}", response_model=ProductBase)
 def get_product(id:int, db:Session = Depends(get_db)):
     response = db.query(Product).filter(Product.id == id).first()
     if not response:
         return {"message": "Product not found"}
     
-    return response
+    return product_to_schema(response)
 
 # Запрос на удаление одного продукта по id
 @app.delete("/products/delete/{id}")
@@ -57,19 +59,38 @@ def delete_product(id: int, db: Session = Depends(get_db)):
 
 # Запрос на создание продукта
 @app.post("/products/create")
-def create_product(product: Create_Product, db: Session = Depends(get_db)):
-    new_product = Product(name = product.name,  
-                          price = product.price,
-                          image = product.image,
-                          category = product.category.value,
-                          heat = product.heat,
-                          cool = product.cool,
-                          water_type = product.water_type,
-                          flow_rate = product.flow_rate,
-                          filters = product.filters,
-                          water_modes = product.water_modes
-                          )
-    validation_by_category(product)
+def create_product(product: ProductBase, db: Session = Depends(get_db)):
+    details = product.details
+
+    if isinstance(details, DispenserBase):
+        new_product = Dispenser(
+            product_type= details.product_type,
+            name=product.name, 
+            price=product.price,
+            image=product.image,
+            heat=product.details.heat,
+            cool=product.details.cool
+            )
+    elif isinstance(details, PurifierBase):
+        new_product = Purifier(
+            product_type= details.product_type,
+            name=product.name, 
+            price=product.price,
+            image=product.image,
+            filters=product.details.filters,
+            water_modes=product.details.water_modes
+            )
+    elif isinstance(details, FountainBase):
+        new_product = Fountain(
+            product_type= details.product_type,
+            name=product.name, 
+            price=product.price,
+            image=product.image,
+            flow_rate=product.details.flow_rate,
+            water_type=product.details.water_type
+        )
+    else:
+        raise HTTPException(status_code=400, detail="Неизвестное поле для такого типа")
     db.add(new_product)
     db.commit()
     db.refresh(new_product)
@@ -77,27 +98,31 @@ def create_product(product: Create_Product, db: Session = Depends(get_db)):
 
 # Запрос на обновления продукта 
 @app.put("/products/update/{id}")
-def update_product(id: int, data: Update_Product, db: Session = Depends(get_db)):
+def update_product(id: int, data: ProductBase, db: Session = Depends(get_db)):
     product = db.query(Product).filter(Product.id == id).first()
     
     if not product:
         return {"message": "Product not found"}
-    
-    validation_by_category(data)
 
-    product.heat = None
-    product.cool = None
-    product.water_type = None
-    product.flow_rate = None
-    product.filters = None
-    product.water_modes = None
+    product.name = data.name
+    product.price = data.price
+    product.image = data.image
 
-    for field, value in data.model_dump().items():
-        if field == "category" and isinstance(value, Category):
-            setattr(product, field, value.value)
-        else:
-            setattr(product, field, value)
+    details = data.details
+
+
+    if product.product_type == "ДИСПЕНСЕРЫ" and isinstance(details, DispenserBase):
+        product.heat = details.heat
+        product.cool = details.cool
+    elif product.product_type == "ПУРИФАЙЕР" and isinstance(details, PurifierBase):
+        product.filters = details.filters
+        product.water_modes = details.water_modes
+    elif product.product_type == "ПИТЬЕВОЙ ФОНТАН" and isinstance(details, FountainBase):
+        product.flow_rate = details.flow_rate
+        product.water_type = details.water_type
     
+    else:
+        raise HTTPException(status_code=400, detail="Не та категория")
     db.commit()
     db.refresh(product)
     return product

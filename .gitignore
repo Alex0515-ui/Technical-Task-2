@@ -9,7 +9,7 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
-*.db
+products.db
 .pytest_cache/
 
 .env
