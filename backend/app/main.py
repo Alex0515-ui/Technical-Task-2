@@ -1,21 +1,20 @@
 from fastapi import FastAPI, Depends, HTTPException
-from sqlalchemy.orm import Session
-from schemas import ProductBase, DispenserBase, PurifierBase, FountainBase
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
+from typing import Optional, Literal
+
+import schemas
 from database import get_db
-from models import Product, Dispenser, Purifier, Fountain
+from models import Dispenser, Purifier, Fountain, ProductCategory, Product
 from seed import seed_db
-from typing import Literal, Optional
-from transform import product_to_schema
 
 app = FastAPI()
 
-# Доступные домены
 origins = [
-    "http://localhost:5173",    
+    "http://localhost:5173",
     "http://127.0.0.1:5173",
 ]
-# Подключение CORS
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -24,109 +23,88 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-seed_db()
+@app.on_event("startup")
+def startup():
+    seed_db()
 
 
-# Запрос на получение всех продуктов
-@app.get("/products", response_model=list[ProductBase])
-def get_all_products(product_type : Optional[Literal["ДИСПЕНСЕРЫ", "ПИТЬЕВОЙ ФОНТАН", "ПУРИФАЙЕР"]] = None, db: Session = Depends(get_db)):
-    response = db.query(Product)
-    # query параметр для фильтрации по категории
+TYPE_MAP = {
+    ProductCategory.DISPENSER.value: Dispenser,
+    ProductCategory.PURIFIER.value: Purifier,
+    ProductCategory.FOUNTAIN.value: Fountain,
+}
+
+@app.get("/products", response_model=list[schemas.ProductResponse])
+def get_all_products(
+    product_type: Optional[
+        Literal["ДИСПЕНСЕРЫ", "ПУРИФАЙЕР", "ПИТЬЕВОЙ ФОНТАН"]
+    ] = None,
+    db: Session = Depends(get_db),
+):
+    query = db.query(Product)
     if product_type:
-        response = response.filter(Product.product_type == product_type)
-    
-    result = response.all()
-    return [product_to_schema(p) for p in result]
+        query = query.filter(Product.product_type == ProductCategory(product_type))
 
-# Запрос на получение одного товара по id
-@app.get("/products/{id}", response_model=ProductBase)
-def get_product(id:int, db:Session = Depends(get_db)):
-    response = db.query(Product).filter(Product.id == id).first()
-    if not response:
-        return {"message": "Product not found"}
-    
-    return product_to_schema(response)
+    products = query.all()
 
-# Запрос на удаление одного продукта по id
-@app.delete("/products/delete/{id}")
-def delete_product(id: int, db: Session = Depends(get_db)):
-    product = db.query(Product).filter(Product.id == id).first()
-    if not product:
-        raise HTTPException(status_code=404, detail="Данный продукт не найден!")
-    db.delete(product)
-    db.commit()
-    return "Product has been deleted"
+    return [
+        {
+            "id": p.id,
+            "name": p.name,
+            "price": p.price,
+            "image": p.image,
+            "details": p,
+        }
+        for p in products
+    ]
 
-# Запрос на создание продукта
 @app.post("/products/create")
-def create_product(product: ProductBase, db: Session = Depends(get_db)):
-    details = product.details
+def create_product(
+    data: schemas.ProductCreate,
+    db: Session = Depends(get_db),
+):
+    if not data.details:
+        raise HTTPException(400, "details is required")
 
-    if isinstance(details, DispenserBase):
-        new_product = Dispenser(
-            product_type= details.product_type,
-            name=product.name, 
-            price=product.price,
-            image=product.image,
-            heat=product.details.heat,
-            cool=product.details.cool
-            )
-    elif isinstance(details, PurifierBase):
-        new_product = Purifier(
-            product_type= details.product_type,
-            name=product.name, 
-            price=product.price,
-            image=product.image,
-            filters=product.details.filters,
-            water_modes=product.details.water_modes
-            )
-    elif isinstance(details, FountainBase):
-        new_product = Fountain(
-            product_type= details.product_type,
-            name=product.name, 
-            price=product.price,
-            image=product.image,
-            flow_rate=product.details.flow_rate,
-            water_type=product.details.water_type
-        )
-    else:
-        raise HTTPException(status_code=400, detail="Неизвестное поле для такого типа")
-    db.add(new_product)
+    model_class = TYPE_MAP.get(data.details.product_type)
+    if not model_class:
+        raise HTTPException(400, "Invalid product type")
+
+    main_info = {
+        "name": data.name,
+        "price": data.price,
+        "image": data.image,
+    }
+
+    details_info = data.details.model_dump(exclude={"product_type"})
+
+    product = model_class(**main_info, **details_info)
+
+    db.add(product)
     db.commit()
-    db.refresh(new_product)
-    return new_product
+    db.refresh(product)
 
-# Запрос на обновления продукта 
+    return {"id": product.id}
+
 @app.put("/products/update/{id}")
-def update_product(id: int, data: ProductBase, db: Session = Depends(get_db)):
+def update_product(
+    id: int,
+    data: schemas.ProductUpdate,
+    db: Session = Depends(get_db),
+):
     product = db.query(Product).filter(Product.id == id).first()
-    
     if not product:
-        return {"message": "Product not found"}
+        raise HTTPException(404, "Not found")
 
     product.name = data.name
     product.price = data.price
     product.image = data.image
 
-    details = data.details
+    if data.details:
+        details_data = data.details.model_dump(exclude={"product_type"})
+        for key, value in details_data.items():
+            setattr(product, key, value)
 
-
-    if product.product_type == "ДИСПЕНСЕРЫ" and isinstance(details, DispenserBase):
-        product.heat = details.heat
-        product.cool = details.cool
-    elif product.product_type == "ПУРИФАЙЕР" and isinstance(details, PurifierBase):
-        product.filters = details.filters
-        product.water_modes = details.water_modes
-    elif product.product_type == "ПИТЬЕВОЙ ФОНТАН" and isinstance(details, FountainBase):
-        product.flow_rate = details.flow_rate
-        product.water_type = details.water_type
-    
-    else:
-        raise HTTPException(status_code=400, detail="Не та категория")
     db.commit()
-    db.refresh(product)
-    return product
 
-
-
-
+    return {"message": "Updated"}
