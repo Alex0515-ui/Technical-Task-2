@@ -27,7 +27,7 @@ const FountainSpecs = ({ details }) => (
   </>
 );
 
-function ProductSlider({ productsRef }) {
+function ProductSlider({ productsRef, openModal }) {
   const [selectedCategory, setSelectedCategory] = useState('ВСЕ');
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -110,7 +110,7 @@ function ProductSlider({ productsRef }) {
 
                 <div className="mt-auto">
                   <div className="text-xl font-bold mb-4 text-gray-900">{product.price} ₸</div>
-                  <button className="w-full bg-blue-500 text-white py-2.5 rounded-lg font-bold text-xs hover:bg-blue-600 transition-colors uppercase tracking-wider">
+                  <button onClick={() => openModal()} className="w-full bg-blue-500 text-white py-2.5 rounded-lg font-bold text-xs hover:bg-blue-600 transition-colors uppercase tracking-wider">
                     Подробнее
                   </button>
                 </div>

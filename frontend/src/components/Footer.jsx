@@ -1,7 +1,7 @@
 import React from 'react';
 import { Phone, Clock, Mail } from 'lucide-react';
 
-const Footer = ({ contactsRef }) => {
+const Footer = ({ contactsRef, openModal }) => {
   return (
     <footer 
       ref={contactsRef} 
@@ -47,9 +47,8 @@ const Footer = ({ contactsRef }) => {
 
         </div>
 
-        {/* Кнопка действия */}
         <div className="w-full md:w-auto text-center">
-          <button className="w-full sm:w-auto px-10 py-4 bg-gradient-to-r from-blue-400 to-blue-600 text-white font-bold rounded-full shadow-lg shadow-blue-200 hover:shadow-xl transition-all uppercase tracking-wider text-sm">
+          <button onClick={() => openModal()} className="w-full sm:w-auto px-10 py-4 bg-gradient-to-r from-blue-400 to-blue-600 text-white font-bold rounded-full shadow-lg shadow-blue-200 hover:shadow-xl transition-all uppercase tracking-wider text-sm">
             Оставить заказ
           </button>
         </div>
