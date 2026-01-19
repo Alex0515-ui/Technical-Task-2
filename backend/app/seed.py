@@ -12,7 +12,7 @@ all_products_data = [
     {
         "category": "ДИСПЕНСЕРЫ",
         "name": "BONA D22",
-        "image": "https://images.unsplash.com/photo-1580910051074-7b3aef07e3b2",
+        "image": "https://via.placeholder.com/200x250",
         "price": 29500,
         "heat": "5 л/ч (90–95°C)",
         "cool": "0.7 л/ч (10–12°C)"
@@ -20,7 +20,7 @@ all_products_data = [
     {
         "category": "ДИСПЕНСЕРЫ",
         "name": "AQUA LINE WL-7",
-        "image": "https://images.unsplash.com/photo-1600180758890-6b94519f7b36",
+        "image": "https://via.placeholder.com/200x250",
         "price": 34900,
         "heat": "6 л/ч (90–95°C)",
         "cool": "1 л/ч (8–10°C)"
@@ -28,7 +28,7 @@ all_products_data = [
     {
         "category": "ПУРИФАЙЕР",
         "name": "ECO FILTER PRO",
-        "image": "https://images.unsplash.com/photo-1582719478185-2d1c7f1b3a6a",
+        "image": "https://via.placeholder.com/200x250",
         "price": 55900,
         "filters": "Угольный, мембранный, постфильтр",
         "water_modes": "Холодная / горячая / комнатная"
@@ -36,7 +36,7 @@ all_products_data = [
     {
         "category": "ПУРИФАЙЕР",
         "name": "PURE FLOW X2",
-        "image": "https://images.unsplash.com/photo-1598887142482-2c78d7a9f7b2",
+        "image": "https://via.placeholder.com/200x250",
         "price": 62900,
         "filters": "RO мембрана, минерализатор",
         "water_modes": "Холодная / горячая"
@@ -44,7 +44,7 @@ all_products_data = [
     {
         "category": "ПИТЬЕВОЙ ФОНТАН",
         "name": "CITY DRINK 300",
-        "image": "https://images.unsplash.com/photo-1560841659-fc74d56a3c87",
+        "image": "https://via.placeholder.com/200x250",
         "price": 78900,
         "water_type": "Питьевая",
         "flow_rate": "2 л/мин"
@@ -52,7 +52,7 @@ all_products_data = [
     {
         "category": "ПИТЬЕВОЙ ФОНТАН",
         "name": "URBAN FLOW S",
-        "image": "https://images.unsplash.com/photo-1606813909355-0c9b9f9a3e2d",
+        "image": "https://via.placeholder.com/200x250",
         "price": 84500,
         "water_type": "Питьевая / охлажденная",
         "flow_rate": "2.5 л/мин"
@@ -60,7 +60,7 @@ all_products_data = [
     {
         "category": "ДИСПЕНСЕРЫ",
         "name": "AQUA SMART MINI",
-        "image": "https://images.unsplash.com/photo-1612197527762-8cfb53d54b5c",
+        "image": "https://via.placeholder.com/200x250",
         "price": 26900,
         "heat": "4 л/ч (85–90°C)",
         "cool": "0.5 л/ч (12–15°C)"

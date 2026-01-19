@@ -3,3 +3,8 @@ pydantic
 sqlalchemy
 axios
 sqladmin
+pyjwt
+pwdlib[argon2]
+jwt
+PyJWT 
+python-jose

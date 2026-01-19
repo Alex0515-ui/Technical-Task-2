@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session, with_polymorphic
 from typing import Optional, Literal
-
+from routers.auth import router
 import schemas
 from database import get_db
 from models import Dispenser, Purifier, Fountain, ProductCategory, Product
@@ -27,6 +27,7 @@ app.add_middleware(
 def startup():
     seed_db()
 
+app.include_router(router)
 
 TYPE_MAP = {
     ProductCategory.DISPENSER.value: Dispenser,
@@ -128,3 +129,4 @@ def delete_product(id: int, db: Session = Depends(get_db)):
     db.commit()
 
     return {"message": f"Product {id} deleted successfully"}
+

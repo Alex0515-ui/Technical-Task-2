@@ -11,6 +11,11 @@ class ProductCategory(str, Enum):
     PURIFIER = "ПУРИФАЙЕР"
     FOUNTAIN = "ПИТЬЕВОЙ ФОНТАН"
 
+class Admin(Base):
+    __tablename__ = "admins"
+    id = Column(Integer, primary_key=True)
+    name = Column(String, unique=True)
+    password = Column(String)
 
 class Product(Base):
     __tablename__ = "products"

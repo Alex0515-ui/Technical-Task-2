@@ -1,12 +1,14 @@
-
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import "./assets/Admin.css"
 
 function Admin() {
+  console.log("ADMIN MOUNTED");
+
   const [products, setProducts] = useState([]);
   const [selectedProductId, setSelectedProductId] = useState(null);
   const [form, setForm] = useState({});
+  const [error, setError] = useState(false)
   const NameInputRef = useRef();
 
 // Загрузка всех товаров при запуске
@@ -169,6 +171,22 @@ function Admin() {
     setForm(clearedForm);
   };
 
+  const handle_save = () => {
+    if (!form.category) {
+      setError(true)
+      return
+    }
+
+    setError(false)
+
+    if (selectedProductId) {
+      redactProduct();
+    }
+    else {
+      addProduct();
+    }
+  };
+
   return (
     <div>
       <header className="header">
@@ -183,14 +201,14 @@ function Admin() {
               value={form.name || ""}
               ref={NameInputRef}
               placeholder="Название товара"
-              onChange={e =>  setForm({ ...form, name: e.target.value })}
+              onChange={e =>  setForm({...form, name: e.target.value})}
             />
             <input
               type="number"
               value={form.price ?? ""}
               placeholder="Цена"
               onChange={e =>
-              setForm({ ...form, price: e.target.value })
+              setForm({...form, price: e.target.value})
               }
             />
             <input
@@ -198,31 +216,36 @@ function Admin() {
               value={form.image || ""}
               placeholder="URL изображения"
               onChange={e =>
-                  setForm({ ...form, image: e.target.value })
+                  setForm({...form, image: e.target.value})
               }
             />
 
             <select
               value={form.category || ""}
-              onChange={e => handle_category_change(e.target.value)}
+              onChange={e => {
+                handle_category_change(e.target.value)
+                setError(false)
+              }}
             >
-              <option value="">Выберите категорию</option>
+              <option value="placeholder">Выберите категорию</option>
               <option value="ПУРИФАЙЕР">ПУРИФАЙЕР</option>
               <option value="ПИТЬЕВОЙ ФОНТАН">ПИТЬЕВОЙ ФОНТАН</option>
               <option value="ДИСПЕНСЕРЫ">ДИСПЕНСЕРЫ</option>
             </select>
+
+            {error && (<p className="error-save">Сначала выберите категорию!</p>)}
 
             {form.category === "ДИСПЕНСЕРЫ" && (
               <>
                 <input
                   value={form.heat || ""}
                   placeholder="Нагрев"
-                  onChange={e => setForm({ ...form, heat: e.target.value })}
+                  onChange={e => setForm({...form, heat: e.target.value})}
                 />
                 <input
                   value={form.cool || ""}
                   placeholder="Охлаждение"
-                  onChange={e => setForm({ ...form, cool: e.target.value })}
+                  onChange={e => setForm({...form, cool: e.target.value})}
                 />
               </>
             )}
@@ -233,14 +256,14 @@ function Admin() {
                   value={form.water_type || ""}
                   placeholder="Тип воды"
                   onChange={e =>
-                    setForm({ ...form, water_type: e.target.value })
+                    setForm({...form, water_type: e.target.value})
                   }
                 />
                 <input
                   value={form.flow_rate || ""}
                   placeholder="Производительность"
                   onChange={e =>
-                    setForm({ ...form, flow_rate: e.target.value })
+                    setForm({...form, flow_rate: e.target.value})
                   }
                 />
               </>
@@ -252,7 +275,7 @@ function Admin() {
                   value={form.filters || ""}
                   placeholder="Фильтры"
                   onChange={e =>
-                    setForm({ ...form, filters: e.target.value })
+                    setForm({...form, filters: e.target.value})
                   }
                 />
                 <input
@@ -268,7 +291,7 @@ function Admin() {
             <button
               type="button"
               className="save-btn"
-              onClick={selectedProductId ? redactProduct : addProduct}
+              onClick={handle_save}
             >
               Сохранить
             </button>
@@ -309,6 +332,7 @@ function Admin() {
     </main>
   </div>
   );
+  
 }
 
 export default Admin;
